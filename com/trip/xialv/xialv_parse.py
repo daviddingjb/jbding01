@@ -8,7 +8,8 @@ from html.parser import HTMLParser
 class MyHTMLParser(HTMLParser):
     container = ""
     def handle_data(self, data):
-        self.container += data.strip().replace("	","").replace(" ","").replace("None"," ")
+        # self.container += data.strip().replace("	","").replace(" ","").replace("None"," ")
+        self.container += data.strip()
         return str(self.container)
 
 def liangdian_parser(url,i):
@@ -17,10 +18,11 @@ def liangdian_parser(url,i):
     try:
         respData = resp.read().decode(resp.headers.get_content_charset())
     except:
-        print("2222222222")
+        respData = ""
+        print("*****urllib.request.urlopen error!*****", url_r)
     # print(respData) # debug
     reg_1 = re.compile(r'<section class="Ask_left main">((?:.|\n)*?)\s*</section>\s*<div class="pageNav">')
-    if str(respData):
+    if respData:
         ld_1 = reg_1.findall(str(respData))
         for ld in ld_1:
             # print(url_r) # debug
@@ -39,7 +41,8 @@ resp = urllib.request.urlopen(url)
 try:
     respData = resp.read().decode(resp.headers.get_content_charset())
 except:
-    print("33333333333")
+    respData = ""
+    print("*****urllib.request.urlopen error!*****", url)
 
 # print(respData) # debug
 regular = re.compile(r'<ul class="scen-list">((?:.|\n)*?)<div class="pageNav">')
@@ -51,6 +54,7 @@ bianhao_reg = re.compile(r'<h3><a href="/scenery/(.*?)" title')
 
 # 打开数据库连接
 db = pymysql.connect("10.35.22.91", "root", "adminadmin", "tr_trip_temp")
+db.set_charset('utf8')
 if not respData:
     respData = "  "
 paragraphs = regular.findall(str(respData))
@@ -78,6 +82,9 @@ for eachP in paragraphs:
 
         # 使用 cursor() 方法创建一个游标对象 cursor
         cursor = db.cursor()
+        cursor.execute('SET NAMES utf8;')
+        cursor.execute('SET CHARACTER SET utf8;')
+        cursor.execute('SET character_set_connection=utf8;')
         try:
             # 执行sql语句
             cursor.execute(sql)
@@ -86,7 +93,7 @@ for eachP in paragraphs:
         except:
             # 如果发生错误则回滚
             # print(sql)
-            print("111111111111111")
+            print("*******insert SQL error!*******")
             db.rollback()
 
 # 关闭数据库连接

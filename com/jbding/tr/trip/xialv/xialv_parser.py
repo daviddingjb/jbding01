@@ -24,7 +24,6 @@ class MyHTMLParser(HTMLParser):
 def liangdian_parser(url,i):
     url_r = url + str(i)
     respData = request_url(url_r)
-    reg_1 = re.compile(r'<section class="Ask_left main">((?:.|\n)*?)\s*</section>\s*<div class="pageNav">')
     if respData:
         ld_1 = reg_1.findall(str(respData))
         for ld in ld_1:
@@ -96,6 +95,7 @@ if __name__ == '__main__':
     father_reg = re.compile(r'\' >(.*?)</a></span></header>')
     fatherurl_reg = re.compile(r'</a></h3><span><a href=\'(.*?)\' title')
     bianhao_reg = re.compile(r'<h3><a href="/scenery/(.*?)" title')
+    reg_1 = re.compile(r'<section class="Ask_left main">((?:.|\n)*?)\s*</section>\s*<div class="pageNav">')
 
     # 打开数据库连接
     db = pymysql.connect("10.35.22.91", "root", "adminadmin", "tr_trip_temp")

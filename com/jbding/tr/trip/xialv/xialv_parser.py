@@ -5,6 +5,16 @@ import numpy as np
 import pymysql
 from html.parser import HTMLParser
 
+def request_url(url):
+    print(url)
+    try:
+        resp = urllib.request.urlopen(url)
+        return resp.read().decode(resp.headers.get_content_charset())
+        # print(respData) #debug
+    except:
+        return " "
+        print("*****urllib.request.urlopen error!*****", url)
+
 class MyHTMLParser(HTMLParser):
     container = ""
     def handle_data(self, data):
@@ -14,13 +24,14 @@ class MyHTMLParser(HTMLParser):
 
 def liangdian_parser(url,i):
     url_r = url + str(i)
-    resp = urllib.request.urlopen(url_r)
-    try:
-        respData = resp.read().decode(resp.headers.get_content_charset())
-    except:
-        respData = ""
-        print("*****urllib.request.urlopen error!*****", url_r)
-    # print(respData) # debug
+    respData = request_url(url_r)
+    # resp = urllib.request.urlopen(url_r)
+    # try:
+    #     respData = resp.read().decode(resp.headers.get_content_charset())
+    # except:
+    #     respData = ""
+    #     print("*****urllib.request.urlopen error!*****", url_r)
+    # # print(respData) # debug
     reg_1 = re.compile(r'<section class="Ask_left main">((?:.|\n)*?)\s*</section>\s*<div class="pageNav">')
     if respData:
         ld_1 = reg_1.findall(str(respData))
@@ -35,37 +46,10 @@ def liangdian_parser(url,i):
                     i = i + 1
                     return str(parser.container) + str(liangdian_parser(url,i))
 
-def main():
-    url = 'http://www.xialv.com/beijing/zhoubianyou'
-    resp = urllib.request.urlopen(url)
-    # respData = resp.read()
-    try:
-        respData = resp.read().decode(resp.headers.get_content_charset())
-    except:
-        respData = " "
-        print("*****urllib.request.urlopen error!*****", url)
-    if not respData:
-        respData = "  "
-
-    # print(respData) # debug
-    pagset_reg = re.compile(r'下一页</a><a href=\'/beijing/zhoubianyou\?&page=(.*?)\'  rel=\'nofollow\' >末页')
-    regular = re.compile(r'<ul class="scen-list">((?:.|\n)*?)<div class="pageNav">')
-    name_reg = re.compile(r'target=\'_blank\'>(.*?)</a></h3>')
-    description_reg = re.compile(r'<p>(.*?)</p>')
-    father_reg = re.compile(r'\' >(.*?)</a></span></header>')
-    fatherurl_reg = re.compile(r'</a></h3><span><a href=\'(.*?)\' title')
-    bianhao_reg = re.compile(r'<h3><a href="/scenery/(.*?)" title')
-
-    pagset = pagset_reg.findall(str(respData)) #获取总页数
-    print("获取总页数", pagset)
-
-    # 打开数据库连接
-    db = pymysql.connect("10.35.22.91", "root", "adminadmin", "tr_trip_temp")
-    db.set_charset('utf8')
+def parser(respData):
     paragraphs = regular.findall(str(respData))
     for eachP in paragraphs:
         # print(eachP) # debug
-
         nameList = name_reg.findall(str(eachP))
         descriptionList = description_reg.findall(eachP)
         fatherList = father_reg.findall(str(eachP))
@@ -102,8 +86,37 @@ def main():
                 print("*******insert SQL error!*******")
                 db.rollback()
 
-    # 关闭数据库连接
-    db.close()
+def main():
+    url = 'http://www.xialv.com/beijing/zhoubianyou'
+    respData = request_url(url)
+
+    pagset = pagset_reg.findall(str(respData)) #获取总页数
+    if not pagset:
+        pagset = ['0']
+    # print("获取总页数", pagset)
+
+    for i in range(int(pagset[0])):
+        url = 'http://www.xialv.com/beijing/zhoubianyou'
+        url = url + "?&page=" + str(i+1)
+        # print(url) # debug
+        respData = request_url(url)
+        parser(respData)
 
 if __name__ == '__main__':
+    # Regular Expressions:
+    pagset_reg = re.compile(r'下一页</a><a href=\'/beijing/zhoubianyou\?&page=(.*?)\'  rel=\'nofollow\' >末页')
+    regular = re.compile(r'<ul class="scen-list">((?:.|\n)*?)<div class="pageNav">')
+    name_reg = re.compile(r'target=\'_blank\'>(.*?)</a></h3>')
+    description_reg = re.compile(r'<p>(.*?)</p>')
+    father_reg = re.compile(r'\' >(.*?)</a></span></header>')
+    fatherurl_reg = re.compile(r'</a></h3><span><a href=\'(.*?)\' title')
+    bianhao_reg = re.compile(r'<h3><a href="/scenery/(.*?)" title')
+
+    # 打开数据库连接
+    db = pymysql.connect("10.35.22.91", "root", "adminadmin", "tr_trip_temp")
+    db.set_charset('utf8')
+
     main()
+
+    # 关闭数据库连接
+    db.close()

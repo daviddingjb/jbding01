@@ -18,26 +18,16 @@ def request_url(url):
 class MyHTMLParser(HTMLParser):
     container = ""
     def handle_data(self, data):
-        # self.container += data.strip().replace("	","").replace(" ","").replace("None"," ")
-        self.container += data.strip().replace("\"","")
+        self.container += data.strip().replace("\"","#")
         return str(self.container)
 
 def liangdian_parser(url,i):
     url_r = url + str(i)
     respData = request_url(url_r)
-    # resp = urllib.request.urlopen(url_r)
-    # try:
-    #     respData = resp.read().decode(resp.headers.get_content_charset())
-    # except:
-    #     respData = ""
-    #     print("*****urllib.request.urlopen error!*****", url_r)
-    # # print(respData) # debug
     reg_1 = re.compile(r'<section class="Ask_left main">((?:.|\n)*?)\s*</section>\s*<div class="pageNav">')
     if respData:
         ld_1 = reg_1.findall(str(respData))
         for ld in ld_1:
-            # print(url_r) # debug
-            # print("ldldldldlddld",ld) # debug
             if ld:
                 parser = MyHTMLParser()
                 parser.feed(ld)
@@ -70,11 +60,6 @@ def parser(respData):
             sql = sql.replace("None"," ")
             print(sql)
 
-            # 使用 cursor() 方法创建一个游标对象 cursor
-            cursor = db.cursor()
-            cursor.execute('SET NAMES utf8;')
-            cursor.execute('SET CHARACTER SET utf8;')
-            cursor.execute('SET character_set_connection=utf8;')
             try:
                 # 执行sql语句
                 cursor.execute(sql)
@@ -115,6 +100,11 @@ if __name__ == '__main__':
     # 打开数据库连接
     db = pymysql.connect("10.35.22.91", "root", "adminadmin", "tr_trip_temp")
     db.set_charset('utf8')
+    # 使用 cursor() 方法创建一个游标对象 cursor
+    cursor = db.cursor()
+    cursor.execute('SET NAMES utf8;')
+    cursor.execute('SET CHARACTER SET utf8;')
+    cursor.execute('SET character_set_connection=utf8;')
 
     main()
 

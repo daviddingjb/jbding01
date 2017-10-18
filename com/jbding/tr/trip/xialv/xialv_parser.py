@@ -34,6 +34,11 @@ def liangdian_parser(url,i):
                 if parser.container:
                     i = i + 1
                     return str(parser.container) + str(liangdian_parser(url,i))
+                return ""
+            else:
+                return ""
+    else:
+        return ""
 
 def parser(respData):
     paragraphs = regular.findall(str(respData))
@@ -99,6 +104,8 @@ if __name__ == '__main__':
 
     # 打开数据库连接
     db = pymysql.connect("10.35.22.91", "root", "adminadmin", "tr_trip_temp")
+    # db = pymysql.connect("localhost", "root", "root", "tr_trip_temp")
+
     db.set_charset('utf8')
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()

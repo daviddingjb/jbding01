@@ -3,6 +3,7 @@ import urllib.parse
 import re
 import numpy as np
 import pymysql
+import time
 from html.parser import HTMLParser
 
 def request_url(url):
@@ -33,6 +34,7 @@ def liangdian_parser(url,i):
                 # print (parser.container) # debug
                 if parser.container:
                     i = i + 1
+                    time.sleep(5)
                     return str(parser.container) + str(liangdian_parser(url,i))
                 return ""
             else:
@@ -90,6 +92,7 @@ def main():
         # print(url) # debug
         respData = request_url(url)
         parser(respData)
+        time.sleep(5)
 
 if __name__ == '__main__':
     # Regular Expressions:
@@ -103,8 +106,8 @@ if __name__ == '__main__':
     reg_1 = re.compile(r'<section class="Ask_left main">((?:.|\n)*?)\s*</section>\s*<div class="pageNav">')
 
     # 打开数据库连接
-    db = pymysql.connect("10.35.22.91", "root", "adminadmin", "tr_trip_temp")
-    # db = pymysql.connect("localhost", "root", "root", "tr_trip_temp")
+    # db = pymysql.connect("10.35.22.91", "root", "adminadmin", "tr_trip_temp")
+    db = pymysql.connect("localhost", "root", "root", "tr_trip_temp")
 
     db.set_charset('utf8')
     # 使用 cursor() 方法创建一个游标对象 cursor

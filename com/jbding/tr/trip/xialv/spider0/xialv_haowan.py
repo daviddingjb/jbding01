@@ -80,12 +80,13 @@ def parser(respData):
             #     db.commit()
             # except:
             #     # 如果发生错误则回滚
-            #     # print(sql)
-            #     print("*******insert SQL error!*******")
-            #     db.rollback()
+                #     # print(sql)
+                #     print("*******insert SQL error!*******")
+                #     db.rollback()
 
 def main():
-    url = 'http://www.xialv.com/beijing/haowan'
+    # url = 'http://www.xialv.com/beijing/haowan'
+    url = main_root + main_name
     respData = request_url(url)
 
     pagset = pagset_reg.findall(str(respData)) #获取总页数
@@ -94,8 +95,8 @@ def main():
     print("获取总页数", pagset)
 
     for i in range(int(pagset[0])):
-        url = 'http://www.xialv.com/beijing/haowan'
-        url = url + "?&page=" + str(i+1)
+        # url = 'http://www.xialv.com/beijing/haowan'
+        url = main_root + main_name + "?&page=" + str(i+1)
         # print(url) # debug
         respData = request_url(url)
         parser(respData)
@@ -103,7 +104,11 @@ def main():
 
 if __name__ == '__main__':
     # Regular Expressions:
-    pagset_reg = re.compile(r'下一页</a><a href=\'/beijing/haowan\?&page=(.*?)\'  rel=\'nofollow\' >末页')
+    main_root = 'http://www.xialv.com'
+    main_name = '/beijing/haowan'
+
+    pagset_reg = re.compile(r'下一页</a><a href=\'' + main_name + '\?&page=(.*?)\'  rel=\'nofollow\' >末页')
+    # pagset_reg = re.compile(r'下一页</a><a href=\'/beijing/haowan\?&page=(.*?)\'  rel=\'nofollow\' >末页')
     regular = re.compile(r'<ul class="scen-list">((?:.|\n)*?)<div class="pageNav">')
     name_reg = re.compile(r'target=\'_blank\'>(.*?)</a></h3>')
     description_reg = re.compile(r'<p>(.*?)</p>')
